@@ -1,102 +1,98 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRef, useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Paperclip, Send, UploadCloud } from "lucide-react";
+
+export default function CoverLetterGenerator() {
+  const fileInputRef = useRef(null);
+
+  const handleAttachClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback((event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log("File attached:", file.name);
+      // TBC
+    }
+  }, []);
+
+  const handleGenerateClick = useCallback(() => {
+    const jobDescription = document.getElementById("job-description").value;
+    console.log(
+      "Generating cover letter with job description:",
+      jobDescription
+    );
+  }, []);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 text-gray-100">
+      {/* Header */}
+      <header className="w-full max-w-3xl mx-auto text-center py-10 px-6">
+        <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-slate-300 to-gray-100 bg-clip-text text-transparent">
+          CoverMe
+        </h1>
+        <p className="mt-4 text-lg sm:text-xl text-gray-400">
+          Your resume. Their job description. One perfect cover letter.
+        </p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <main className="flex-grow flex flex-col items-center justify-center w-full max-w-3xl mx-auto px-6 pb-24">
+        <div className="w-full bg-[#2B2D42] rounded-2xl shadow-lg p-8 text-center text-gray-100 border border-gray-700">
+          <p className="text-2xl font-bold mb-3 tracking-tight">
+            Let’s craft a cover letter that stands out.
+          </p>
+          <p className="text-base text-gray-400">
+            Attach your resume and paste the job description below to get
+            started.
+          </p>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+      {/* Input Bar */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 px-4 py-4 sm:px-6 shadow-xl z-50">
+        <div className="mx-auto w-full max-w-3xl flex items-center justify-center gap-2 bg-gray-800 border border-gray-700 rounded-3xl p-2">
+          {/* File input for resume upload */}
+          <Input
+            id="resume-upload"
+            type="file"
+            accept=".pdf,.doc,.docx"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          {/* Attach button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleAttachClick}
+            className="w-10 h-10 text-gray-400 hover:text-white hover:cursor-pointer hover:bg-transparent transition-colors"
+            aria-label="Attach Resume"
+          >
+            <Paperclip className="w-5 h-5" />
+          </Button>
+          {/* Job Description*/}
+          <Textarea
+            id="job-description"
+            placeholder="Paste the full job description here..."
+            rows={1}
+            className="flex-1 resize-none border-none bg-transparent text-gray-50 placeholder-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus:border-transparent focus:shadow-none text-base max-h-[150px] overflow-y-auto py-2"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          {/* Generate Button */}
+          <Button
+            onClick={handleGenerateClick}
+            variant="ghost"
+            size="icon"
+            className="w-10 h-10 hover:cursor-pointer text-gray-400 hover:bg-transparent hover:text-white rounded-full transition duration-200"
+            aria-label="Generate Cover Letter"
+          >
+            <Send className="w-5 h-5" />
+          </Button>
+        </div>
       </footer>
     </div>
   );
