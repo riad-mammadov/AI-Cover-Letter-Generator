@@ -34,7 +34,7 @@ export default function CoverLetterGenerator() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-stone-950 to-slate-900 text-gray-100 relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900 text-gray-100 relative overflow-hidden">
       {/* Header */}
       <Header />
 
@@ -96,58 +96,6 @@ export default function CoverLetterGenerator() {
             </p>
           </div>
         </div>
-
-        {session?.user?.name && (
-          <div className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-6 sm:px-6 z-50">
-            <div className="mx-auto w-full max-w-4xl">
-              <div className="flex items-end gap-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-4 shadow-2xl">
-                {/* File input for resume upload */}
-                <Input
-                  id="resume-upload"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-
-                {/* Attach button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleAttachClick}
-                  className="w-12 h-12 text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200 rounded-2xl flex-shrink-0"
-                  aria-label="Attach Resume"
-                >
-                  <Paperclip className="w-5 h-5" />
-                </Button>
-
-                {/* Job Description */}
-                <div className="flex-1">
-                  <Textarea
-                    id="job-description"
-                    placeholder="Paste the complete job description here... Include requirements, responsibilities, and company details for the best results."
-                    rows={3}
-                    className="resize-none border-none bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 text-base min-h-[80px] max-h-[200px]"
-                  />
-                </div>
-
-                {/* Generate Button */}
-                <Button
-                  onClick={handleGenerateClick}
-                  className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white rounded-2xl transition-all duration-200 flex-shrink-0 shadow-lg hover:shadow-xl"
-                  aria-label="Generate Cover Letter"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-              </div>
-
-              <p className="text-center text-xs text-gray-500 mt-3">
-                Press Enter to generate &bull; Supports PDF, DOC, and DOCX files
-              </p>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );
