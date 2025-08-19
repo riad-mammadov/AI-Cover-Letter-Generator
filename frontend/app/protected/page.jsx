@@ -29,44 +29,18 @@ export default function ChatInterface() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   // Mock data for now
-  const [messages] = useState([
+  const [messages, setMessages] = useState([
     {
       id: 1,
-      type: "assistant",
+      type: "model",
       content: `I'm ready to help you create the perfect cover letter! Upload your resume and share the job description you're applying for, and I'll craft a personalised cover letter that highlights your best qualities.`,
-    },
-  ]);
-
-  const [chatHistory] = useState([
-    {
-      id: 1,
-      title: "Software Engineer at Google",
-      date: "Today",
-      preview: "Dear Hiring Manager, I am writing to express...",
-    },
-    {
-      id: 2,
-      title: "Product Manager at Meta",
-      date: "Yesterday",
-      preview: "I am excited to apply for the Product Manager...",
-    },
-    {
-      id: 3,
-      title: "UX Designer at Apple",
-      date: "2 days ago",
-      preview: "As a passionate UX designer with 5 years...",
-    },
-    {
-      id: 4,
-      title: "Data Scientist at Netflix",
-      date: "1 week ago",
-      preview: "Dear Netflix Team, I am thrilled to apply...",
     },
   ]);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
+  const scrollAreaRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -78,11 +52,40 @@ export default function ChatInterface() {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() && !selectedFile) return;
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        id: Date.now(),
+        type: "user",
+        content: inputValue.trim(),
+      },
+    ]);
+
+    const formData = new FormData();
+    formData.append("uploaded_file", selectedFile);
+    formData.append("description", inputValue.trim());
+
+    try {
+      const data = await fetch("http://127.0.0.1:8000/file/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!data.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      const response = await data.json();
+      console.log("File uploaded successfully:", response);
+
+      // You can now setInput(data.text) or process it with LLM
+    } catch (err) {
+      console.error("Error uploading file:", err);
+    }
+
     setIsLoading(true);
-    console.log("Sending message:", inputValue);
-    console.log("With file:", selectedFile);
     setInputValue("");
-    setSelectedFile(null);
     setIsLoading(false);
   };
 
@@ -103,31 +106,10 @@ export default function ChatInterface() {
     if (!file) return;
 
     setSelectedFile(file);
-
-    const formData = new FormData();
-    formData.append("uploaded_file", file);
-
-    try {
-      const data = await fetch("http://127.0.0.1:8000/file/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!data.ok) {
-        throw new Error("Failed to upload file");
-      }
-
-      const response = await data.json();
-      console.log("File uploaded successfully:", response);
-
-      // You can now setInput(data.text) or process it with LLM
-    } catch (err) {
-      console.error("Error uploading file:", err);
-    }
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
       {/* Sidebar */}
       <div
         className={`${
@@ -214,37 +196,10 @@ export default function ChatInterface() {
               customise the generated content to ensure it is accurate.
             </p>
           </div>
-
-          {/* 
-          <div className="p-6 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-gray-800/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    Guest User
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">
-                    Local Session
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-9 h-9 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg"
-                onClick={() => (window.location.href = "/")}
-              >
-                <Home className="w-4 h-4" />
-              </Button>
-            </div>
-          </div> */}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <header className="backdrop-blur-xl bg-slate-900/50 border-b border-slate-700/50 px-6 py-4 ">
           <div className="flex items-center justify-between lg:justify-start">
             <div className="flex items-center gap-4">
@@ -262,84 +217,87 @@ export default function ChatInterface() {
             </div>
           </div>
         </header>
-
         {/* Messages Area */}
-        <ScrollArea className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto space-y-8">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-4 ${
-                  message.type === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                {message.type === "assistant" && (
-                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[85%] ${
-                    message.type === "user" ? "order-first" : ""
-                  }`}
-                >
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea ref={scrollAreaRef} className="h-full">
+            <div className="p-6">
+              <div className="max-w-4xl mx-auto space-y-8">
+                {messages.map((message) => (
                   <div
-                    className={`rounded-2xl px-6 py-4 shadow-lg ${
-                      message.type === "user"
-                        ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white ml-auto shadow-purple-500/25"
-                        : "bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 text-slate-100 shadow-slate-900/25"
+                    key={message.id}
+                    className={`flex gap-4 ${
+                      message.type === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                    {message.type === "assistant" && (
-                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-700/30">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-3 text-xs hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg"
-                        >
-                          <Copy className="w-3 h-3 mr-2" />
-                          Copy
-                        </Button>
+                    {message.type === "model" && (
+                      <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
+                        <Sparkles className="w-5 h-5 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[85%] ${
+                        message.type === "user" ? "order-first" : ""
+                      }`}
+                    >
+                      <div
+                        className={`rounded-2xl px-6 py-4 shadow-lg ${
+                          message.type === "user"
+                            ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white ml-auto shadow-purple-500/25"
+                            : "bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 text-slate-100 shadow-slate-900/25"
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {message.content}
+                        </p>
+                        {message.type === "model" && (
+                          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-700/30">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 px-3 text-xs hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg"
+                            >
+                              <Copy className="w-3 h-3 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {message.type === "user" && (
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
+                        <User className="w-5 h-5 text-white" />
                       </div>
                     )}
                   </div>
-                </div>
-                {message.type === "user" && (
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                    <User className="w-5 h-5 text-white" />
+                ))}
+                {isLoading && (
+                  <div className="flex gap-4 justify-start">
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-6 py-4 shadow-lg shadow-slate-900/25">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-4 justify-start">
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-6 py-4 shadow-lg shadow-slate-900/25">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
+            </div>
+          </ScrollArea>
+        </div>
 
         {/* Input Area */}
-        <div className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-xl p-6">
+        <div className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-xl p-6 flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             {/* File Upload Indicator */}
             {selectedFile && (
@@ -366,6 +324,14 @@ export default function ChatInterface() {
               </div>
             )}
             <div className="flex items-end gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4 shadow-lg">
+              <Textarea
+                ref={textareaRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Describe the job you're applying for, or paste in the job description..."
+                className="h-24 resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed"
+                rows={4}
+              />
               <input
                 type="file"
                 ref={fileInputRef}
@@ -381,18 +347,10 @@ export default function ChatInterface() {
               >
                 <Paperclip className="w-5 h-5" />
               </Button>
-              <Textarea
-                ref={textareaRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Describe the job you're applying for, or paste in the job description..."
-                className="flex-1 min-h-[24px] max-h-32 resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed"
-                rows={1}
-              />
               <Button
                 onClick={handleSendMessage}
-                disabled={(!inputValue.trim() && !selectedFile) || isLoading}
-                className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 hover:shadow-purple-500/40 hover:scale-105"
+                disabled={isLoading}
+                className="flex-shrink-0 w-10 h-10 bg-gradient-to-r cursor-pointer from-violet-600 to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md shadow-purple-500/25 transition-all duration-200 hover:shadow-purple-500/40 hover:scale-105"
               >
                 <Send className="w-5 h-5" />
               </Button>
@@ -404,7 +362,6 @@ export default function ChatInterface() {
         </div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
