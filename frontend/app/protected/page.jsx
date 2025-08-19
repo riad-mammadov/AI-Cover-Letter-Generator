@@ -36,7 +36,6 @@ export default function ChatInterface() {
       id: 1,
       type: "assistant",
       content: `Hi! I'm ready to help you create the perfect cover letter. Upload your resume and share the job description you're applying for, and I'll craft a personalized cover letter that highlights your best qualities.`,
-      timestamp: new Date(),
     },
   ]);
 
@@ -108,22 +107,21 @@ export default function ChatInterface() {
     setSelectedFile(file);
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("uploaded_file", file);
 
     try {
-      const res = await fetch("/api/pdf/parse", {
+      const data = await fetch("http://127.0.0.1:8000/file/upload", {
         method: "POST",
         body: formData,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Error parsing PDF:", data.error);
-        return;
+      if (!data.ok) {
+        throw new Error("Failed to upload file");
       }
 
-      console.log("Extracted PDF text:", data.text);
+      const response = await data.json();
+      console.log("File uploaded successfully:", response);
+
       // You can now setInput(data.text) or process it with LLM
     } catch (err) {
       console.error("Error uploading file:", err);
@@ -316,12 +314,6 @@ export default function ChatInterface() {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mt-2 px-2 font-medium">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
                 </div>
                 {message.type === "user" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
