@@ -1,65 +1,77 @@
-from fastapi import FastAPI, UploadFile, APIRouter
+from fastapi import FastAPI, UploadFile, APIRouter, Form
 from fastapi.middleware.cors import CORSMiddleware
-from response_model.models import PDFInfo
+from response_model.models import PDFInfo, AIRes
 import pymupdf
 import re
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
+import os
+from prompt import cover_letter_prompt
+
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
 
 router = APIRouter(prefix="/file", tags=["File"])
 
-remove_this = ["•", "-", '\n', "_"]
+client = genai.Client(api_key=API_KEY)
 
-def clean_up(text):
-    keywords = [
-        "Relevant Experience",
-        "Projects",
-        "Skills",
-        "Education",
-        "Certifications"
+def clean_up(text, description):
+    text = text.strip()                         
+    text = re.sub(r'\s+', ' ', text)
+
+    description = description.strip()
+    description = re.sub(r'\s+', ' ', description)
+
+    return {"cv_text": text, "description": description}
+
+def generate(prompt: str):
+    model = "gemini-2.0-flash"
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(text=prompt),
+            ],
+        ),
     ]
-
-    # Find all keyword positions
-    positions = sorted(
-        (m.start(), k) for k in keywords for m in re.finditer(rf"\b{k}\b", text)
+    tools = [
+        types.Tool(googleSearch=types.GoogleSearch(
+        )),
+    ]
+    generate_content_config = types.GenerateContentConfig(
+        temperature= 0.3,
+        tools=tools,
     )
 
-    sections = {}
-    for i, (start, keyword) in enumerate(positions):
-        end = positions[i + 1][0] if i + 1 < len(positions) else len(text)
-        section_text = text[start + len(keyword):end].strip()
+    res = client.models.generate_content_stream(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    )
 
-        # Remove unwanted symbols
-        for char in remove_this:
-            section_text = section_text.replace(char, "")
+    generated = "".join(
+    part.text
+    for chunk in res
+    for candidate in chunk.candidates
+    if candidate.content and candidate.content.parts
+    for part in candidate.content.parts
+    if part.text
+)
 
-        section_text = re.sub(r"[_-]{3,}", "", section_text)
+    return {"role": "model", "text": generated}
 
-        sections[keyword] = section_text
-
-    return sections
-
-# def condense_resume(resume, max_words_per_section=150):
-    # condensed = {}
-    
-    # for section, content in resume.items():
-    #     text = content.replace("\n", " ")
         
-    #     text = " ".join(text.split())
-    #     for b in bulletpoint:
-    #         text = text.replace(b, '')
-    #     words = text.split()
-    #     if len(words) > max_words_per_section:
-    #         words = words[:max_words_per_section]
-    #         text = " ".join(words) + "..."
-    #     else:
-    #         text = " ".join(words)
-        
-    #     condensed[section] = text
-    
-    # return condensed
+
+@router.post("/gen", response_model=AIRes)
+def get_content(cv_text, description):
+    prompt = cover_letter_prompt(cv_text=cv_text, job_desc=description)
+    res = generate(prompt)
+    return res
 
 
-@router.post("/upload", response_model=PDFInfo)
-async def upload(uploaded_file: UploadFile):
+@router.post("/upload")
+async def upload(uploaded_file: UploadFile, description: str = Form(...)):
     file_bytes = await uploaded_file.read()
     doc = pymupdf.open(stream=file_bytes, filetype="pdf")
     text = ""
@@ -67,7 +79,12 @@ async def upload(uploaded_file: UploadFile):
         text += page.get_text()
     
     text = re.sub(r"\s+", " ", text)
-    
-    section = clean_up(text)
+    section = clean_up(text, description)
 
-    return PDFInfo(filename = uploaded_file.filename, section = section)
+    response = get_content(**section)
+
+    return response
+
+# @router.post("/job_desc")
+# def description(description: str):
+#     print(description)
