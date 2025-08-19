@@ -3,4 +3,10 @@ from typing import Dict,List
 
 class PDFInfo(BaseModel):
     filename: str
-    section: Dict[str, str]
+    description: str
+    cv_text: str
+
+class AIRes(BaseModel):
+    role: str
+    text: str
+
