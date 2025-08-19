@@ -23,8 +23,7 @@ export default function Header() {
             variant="secondary"
             className="bg-white/5 hover:cursor-pointer border-white/10 hover:bg-white/10 text-white backdrop-blur-sm transition-all duration-200"
           >
-            <User className="w-4 h-4 mr-2" />
-            Generate
+            Generate Your Cover Letter
           </Button>
         </Link>
         {/* <Button
