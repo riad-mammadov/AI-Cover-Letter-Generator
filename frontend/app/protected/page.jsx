@@ -9,18 +9,16 @@ import {
   Send,
   Paperclip,
   Plus,
-  MessageSquare,
   FileText,
   User,
   Settings,
   Menu,
   X,
   Sparkles,
-  Download,
   Copy,
-  LogOut,
-  MoreHorizontal,
   Home,
+  Info,
+  HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,7 +33,7 @@ export default function ChatInterface() {
     {
       id: 1,
       type: "assistant",
-      content: `Hi! I'm ready to help you create the perfect cover letter. Upload your resume and share the job description you're applying for, and I'll craft a personalized cover letter that highlights your best qualities.`,
+      content: `I'm ready to help you create the perfect cover letter! Upload your resume and share the job description you're applying for, and I'll craft a personalised cover letter that highlights your best qualities.`,
     },
   ]);
 
@@ -138,7 +136,7 @@ export default function ChatInterface() {
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-gray-800/50">
+          <div className="flex items-center p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-gray-800/50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
                 <FileText className="w-5 h-5 text-white" />
@@ -169,91 +167,85 @@ export default function ChatInterface() {
             </Button>
           </div>
 
-          {/* Chat history */}
-          <ScrollArea className="flex-1 px-6">
+          {/* Main content (Navigation) */}
+          <div className="flex-1 px-6 overflow-y-auto">
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                Recent Chats
+                Navigation
               </h3>
-              {chatHistory.map((chat) => (
-                <div
-                  key={chat.id}
-                  variant="ghost"
-                  onClick={() => handleChatSelect(chat.id)}
-                  className="w-full justify-start h-auto p-4 text-left hover:bg-slate-800/50 group rounded-xl transition-all duration-200 border border-transparent hover:border-slate-700/50 hover:shadow-lg"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <MessageSquare className="w-4 h-4 text-violet-400 flex-shrink-0" />
-                        <span className="text-sm font-medium text-white truncate">
-                          {chat.title}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white hover:bg-slate-700/50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log("Chat options for:", chat.id);
-                        }}
-                      >
-                        <MoreHorizontal className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-slate-400 truncate mb-2 leading-relaxed">
-                      {chat.preview}
-                    </p>
-                    <span className="text-xs text-slate-500 font-medium">
-                      {chat.date}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
 
-          {/* User profile on sidebar */}
-          <div className="p-6 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-gray-800/30">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                {/* <p className="text-sm font-semibold text-white truncate">
-                  {session?.user?.name || "User"}
-                </p>
-                <p className="text-xs text-slate-400 truncate">
-                  {session?.user?.email}
-                </p> */}
-              </div>
-              <div className="flex gap-1">
-                <Link href="/">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-9 h-9 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg"
-                  >
-                    <Home className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-9 h-9 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                onClick={() => (window.location.href = "/")}
+              >
+                <Home className="w-5 h-5 text-violet-400" />
+                <span className="text-sm font-medium">Home</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                onClick={() => console.log("About clicked")}
+              >
+                <Info className="w-5 h-5 text-violet-400" />
+                <span className="text-sm font-medium">About</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                onClick={() => console.log("Help clicked")}
+              >
+                <HelpCircle className="w-5 h-5 text-violet-400" />
+                <span className="text-sm font-medium">Help & Support</span>
+              </Button>
             </div>
           </div>
+
+          {/* Project Info at Bottom */}
+          <div className="p-6 bg-slate-800/30 border-t border-slate-700/30">
+            <h4 className="text-sm font-semibold text-white mb-2">
+              Disclaimer
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              This tool is here to help, but your final cover letter should
+              reflect your own voice and experiences. Always review and
+              customise the generated content to ensure it is accurate.
+            </p>
+          </div>
+
+          {/* 
+          <div className="p-6 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-gray-800/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white truncate">
+                    Guest User
+                  </p>
+                  <p className="text-xs text-slate-400 truncate">
+                    Local Session
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-9 h-9 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg"
+                onClick={() => (window.location.href = "/")}
+              >
+                <Home className="w-4 h-4" />
+              </Button>
+            </div>
+          </div> */}
         </div>
       </div>
 
       <div className="flex-1 flex flex-col">
-        <header className="backdrop-blur-xl bg-slate-900/50 border-b border-slate-700/50 px-6 py-4 shadow-lg">
+        <header className="backdrop-blur-xl bg-slate-900/50 border-b border-slate-700/50 px-6 py-4 ">
           <div className="flex items-center justify-between lg:justify-start">
             <div className="flex items-center gap-4">
               <Button
@@ -266,7 +258,7 @@ export default function ChatInterface() {
               </Button>
             </div>
             <div className="text-sm text-slate-300 font-medium">
-              {/* Welcome back, {session?.user?.name?.split(" ")[0]}! */}
+              Welcome back, Riad!
             </div>
           </div>
         </header>
@@ -317,15 +309,7 @@ export default function ChatInterface() {
                 </div>
                 {message.type === "user" && (
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                    {/* {session?.user?.image ? (
-                      <img
-                        src={session.user.image || "/placeholder.svg"}
-                        alt={session.user.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-5 h-5 text-white" />
-                    )} */}
+                    <User className="w-5 h-5 text-white" />
                   </div>
                 )}
               </div>
@@ -401,7 +385,7 @@ export default function ChatInterface() {
                 ref={textareaRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Describe the job you're applying for, or upload your resume and job description..."
+                placeholder="Describe the job you're applying for, or paste in the job description..."
                 className="flex-1 min-h-[24px] max-h-32 resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed"
                 rows={1}
               />

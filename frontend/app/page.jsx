@@ -3,6 +3,8 @@
 import { useRef, useCallback, useState } from "react";
 import { Paperclip, Send, User, Sparkles, FileText, Zap } from "lucide-react";
 import Header from "@/components/Header";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function CoverLetterGenerator() {
   const [fileName, setFileName] = useState("");
@@ -38,7 +40,7 @@ export default function CoverLetterGenerator() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-purple-300">Powered by GPT-4</span>
+            <span className="text-sm text-purple-300">Powered by OpenAI</span>
           </div>
 
           <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tight mb-6">
@@ -53,9 +55,20 @@ export default function CoverLetterGenerator() {
 
           <p className="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Transform your resume and any job description into a compelling,
-            personalized cover letter in seconds.
+            personalised cover letter in seconds.
           </p>
         </div>
+
+        {/* <div className="flex flex-col justify-center items-center w-full max-w-3xl mb-12">
+          <Link href="/protected">
+            <Button
+              variant="secondary"
+              className="bg-white/5 h-12 w-12hover:cursor-pointer border-white/10 hover:bg-white/10 text-white backdrop-blur-sm transition-all duration-200"
+            >
+              Generate Cover Letter
+            </Button>
+          </Link>
+        </div> */}
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-3xl mb-12">
@@ -65,7 +78,7 @@ export default function CoverLetterGenerator() {
             </div>
             <h3 className="font-semibold text-white mb-2">Lightning Fast</h3>
             <p className="text-sm text-gray-400">
-              Generate professional cover letters in under 30 seconds.
+              Generate cover letters instantly, saving you time and effort.
             </p>
           </div>
 
@@ -75,8 +88,8 @@ export default function CoverLetterGenerator() {
             </div>
             <h3 className="font-semibold text-white mb-2">AI-Powered</h3>
             <p className="text-sm text-gray-400">
-              Let our powerful AI match your skills effortlessly, guided by an
-              optimised prompt so you can focus on what truly matters.
+              Let us match your skills effortlessly, guided by an optimised
+              prompt so you can focus on what truly matters.
             </p>
           </div>
 
@@ -84,7 +97,7 @@ export default function CoverLetterGenerator() {
             <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <FileText className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-white mb-2">Personalized</h3>
+            <h3 className="font-semibold text-white mb-2">Personalised</h3>
             <p className="text-sm text-gray-400">
               Each letter is uniquely crafted for the specific role, ensuring
               the best possible cover letters.
