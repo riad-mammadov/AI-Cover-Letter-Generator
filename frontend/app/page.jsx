@@ -39,7 +39,7 @@ export default function CoverLetterGenerator() {
           <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-3 py-2 sm:px-4 sm:py-2 mb-4 sm:mb-6">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
             <span className="text-xs sm:text-sm text-purple-300">
-              Powered by OpenAI
+              Powered by Google Gemini
             </span>
           </div>
 
