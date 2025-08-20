@@ -3,15 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { signOut } from "next-auth/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Send,
   Paperclip,
-  Plus,
   FileText,
   User,
-  Settings,
   Menu,
   X,
   Sparkles,
@@ -20,7 +17,6 @@ import {
   Info,
   HelpCircle,
 } from "lucide-react";
-import Link from "next/link";
 
 export default function ChatInterface() {
   const [inputValue, setInputValue] = useState("");
@@ -50,15 +46,27 @@ export default function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).catch((err) => {
+      console.error("Failed to copy text:", err);
+    });
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim() && !selectedFile) return;
+
+    let displayText = inputValue.trim();
+
+    if (displayText.length > 500) {
+      displayText = displayText.slice(0, 500) + "...";
+    }
 
     setMessages((prevMessages) => [
       ...prevMessages,
       {
-        id: Date.now(),
+        id: prevMessages.length + 1,
         type: "user",
-        content: inputValue.trim(),
+        content: displayText,
       },
     ]);
 
@@ -66,6 +74,7 @@ export default function ChatInterface() {
     formData.append("uploaded_file", selectedFile);
     formData.append("description", inputValue.trim());
 
+    setIsLoading(true);
     try {
       const data = await fetch("http://127.0.0.1:8000/file/upload", {
         method: "POST",
@@ -73,28 +82,41 @@ export default function ChatInterface() {
       });
 
       if (!data.ok) {
-        throw new Error("Failed to upload file");
+        throw new Error("Failed to retrieve data");
       }
 
       const response = await data.json();
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          type: response.role,
+          content:
+            response.text ||
+            "An error occurred while generating the cover letter. Please try again.",
+        },
+      ]);
       console.log("File uploaded successfully:", response);
-
-      // You can now setInput(data.text) or process it with LLM
     } catch (err) {
       console.error("Error uploading file:", err);
     }
 
-    setIsLoading(true);
     setInputValue("");
     setIsLoading(false);
   };
 
-  const handleNewChat = async () => {
-    console.log("Creating new chat");
-  };
-
-  const handleChatSelect = async (chatId) => {
-    console.log("Loading chat:", chatId);
+  const handleClearChat = async () => {
+    setMessages([
+      {
+        id: 1,
+        type: "model",
+        content: `I'm ready to help you create the perfect cover letter! Upload your resume and share the job description you're applying for, and I'll craft a personalised cover letter that highlights your best qualities.`,
+      },
+    ]);
+    setInputValue("");
+    setSelectedFile(null);
+    setSidebarOpen(false);
+    scrollToBottom();
   };
 
   const handleFileUpload = () => {
@@ -113,17 +135,17 @@ export default function ChatInterface() {
       {/* Sidebar */}
       <div
         className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 left-0 z-50 w-80 backdrop-blur-xl bg-slate-900/80 border-r border-slate-700/50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-2xl`}
+          sidebarOpen ? "-translate-x-0" : "-translate-x-full"
+        } fixed inset-y-0 left-0 z-50 w-80 sm:w-72 md:w-80 backdrop-blur-xl bg-slate-900/80 border-r border-slate-700/50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-2xl`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="flex items-center p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-gray-800/50">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-gray-800/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
-                <FileText className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent tracking-tight">
+              <span className="font-bold text-lg sm:text-xl bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent tracking-tight">
                 CoverMe
               </span>
             </div>
@@ -138,19 +160,18 @@ export default function ChatInterface() {
           </div>
 
           {/* New Chat Button */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <Button
               variant="ghost"
-              onClick={handleNewChat}
-              className="w-full justify-center gap-3 bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white transition-all duration-200 cursor-pointer font-medium py-3 rounded-xl"
+              onClick={handleClearChat}
+              className="w-full justify-center gap-3 bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white transition-all duration-200 cursor-pointer font-serif font-medium py-3 rounded-xl text-sm sm:text-base"
             >
-              <Plus className="w-5 h-5" />
-              New Cover Letter
+              Clear Chat
             </Button>
           </div>
 
           {/* Main content (Navigation) */}
-          <div className="flex-1 px-6 overflow-y-auto">
+          <div className="flex-1 px-4 sm:px-6 overflow-y-auto">
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
                 Navigation
@@ -158,35 +179,35 @@ export default function ChatInterface() {
 
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                 onClick={() => (window.location.href = "/")}
               >
-                <Home className="w-5 h-5 text-violet-400" />
+                <Home className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
                 <span className="text-sm font-medium">Home</span>
               </Button>
 
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                 onClick={() => console.log("About clicked")}
               >
-                <Info className="w-5 h-5 text-violet-400" />
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
                 <span className="text-sm font-medium">About</span>
               </Button>
 
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-4 transition-all duration-200"
+                className="w-full justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                 onClick={() => console.log("Help clicked")}
               >
-                <HelpCircle className="w-5 h-5 text-violet-400" />
+                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
                 <span className="text-sm font-medium">Help & Support</span>
               </Button>
             </div>
           </div>
 
           {/* Project Info at Bottom */}
-          <div className="p-6 bg-slate-800/30 border-t border-slate-700/30">
+          <div className="p-4 sm:p-6 bg-slate-800/30 border-t border-slate-700/30">
             <h4 className="text-sm font-semibold text-white mb-2">
               Disclaimer
             </h4>
@@ -200,7 +221,7 @@ export default function ChatInterface() {
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="backdrop-blur-xl bg-slate-900/50 border-b border-slate-700/50 px-6 py-4 ">
+        <header className="backdrop-blur-xl bg-slate-900/50 border-b border-slate-700/50 px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between lg:justify-start">
             <div className="flex items-center gap-4">
               <Button
@@ -212,35 +233,54 @@ export default function ChatInterface() {
                 <Menu className="w-5 h-5" />
               </Button>
             </div>
-            <div className="text-sm text-slate-300 font-medium">
-              Welcome back, Riad!
+            <div className="text-xs sm:text-xs text-slate-400 text-right sm:text-left">
+              <span className="hidden sm:inline">Powered by </span>
+              <span className="hidden sm:inline text-slate-200 font-medium">
+                Next.js
+              </span>
+              <span className="hidden xs:inline">, </span>
+              <span className="hidden xs:inline text-slate-200 font-medium">
+                Tailwind
+              </span>
+              <span className="hidden sm:inline">, </span>
+              <span className="hidden sm:inline text-slate-200 font-medium">
+                FastAPI
+              </span>
+              <span className="hidden sm:inline"> & </span>
+              <span className="hidden sm:inline text-slate-200 font-medium">
+                Google Gemini
+              </span>
+              <span className="hidden sm:inline"> · Crafted by </span>
+              <span className="hidden sm:inline text-slate-200 font-semibold">
+                Riad
+              </span>
             </div>
           </div>
         </header>
         {/* Messages Area */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea ref={scrollAreaRef} className="h-full">
-            <div className="p-6">
-              <div className="max-w-4xl mx-auto space-y-8">
+            <div className="p-3 sm:p-6">
+              <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex gap-4 ${
+                    className={`flex gap-3 sm:gap-4 ${
                       message.type === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
                     {message.type === "model" && (
-                      <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
-                        <Sparkles className="w-5 h-5 text-white" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
+                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
                     )}
                     <div
-                      className={`max-w-[85%] ${
+                      className={`max-w-[90%] sm:max-w-[85%] ${
                         message.type === "user" ? "order-first" : ""
                       }`}
                     >
                       <div
-                        className={`rounded-2xl px-6 py-4 shadow-lg ${
+                        className={`rounded-2xl px-4 py-3 sm:px-6 sm:py-4 shadow-lg ${
                           message.type === "user"
                             ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white ml-auto shadow-purple-500/25"
                             : "bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 text-slate-100 shadow-slate-900/25"
@@ -250,13 +290,14 @@ export default function ChatInterface() {
                           {message.content}
                         </p>
                         {message.type === "model" && (
-                          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-700/30">
+                          <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-700/30">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 px-3 text-xs hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg"
+                              onClick={() => copyToClipboard(message.content)}
+                              className="h-7 sm:h-8 px-2 sm:px-3 text-xs hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg"
                             >
-                              <Copy className="w-3 h-3 mr-2" />
+                              <Copy className="w-3 h-3 mr-1 sm:mr-2" />
                               Copy
                             </Button>
                           </div>
@@ -264,26 +305,26 @@ export default function ChatInterface() {
                       </div>
                     </div>
                     {message.type === "user" && (
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
                     )}
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex gap-4 justify-start">
-                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
-                      <Sparkles className="w-5 h-5 text-white" />
+                  <div className="flex gap-3 sm:gap-4 justify-start">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg shadow-purple-500/25">
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
-                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-6 py-4 shadow-lg shadow-slate-900/25">
+                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-4 py-3 sm:px-6 sm:py-4 shadow-lg shadow-slate-900/25">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-violet-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                         <div
-                          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                          className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"
                           style={{ animationDelay: "0.1s" }}
                         ></div>
                         <div
-                          className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                          className="w-2 h-2 bg-slate-600 rounded-full animate-bounce"
                           style={{ animationDelay: "0.2s" }}
                         ></div>
                       </div>
@@ -297,18 +338,18 @@ export default function ChatInterface() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-xl p-6 flex-shrink-0">
+        <div className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-xl p-3 sm:p-6 flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             {/* File Upload Indicator */}
             {selectedFile && (
-              <div className="mb-4 p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-xl backdrop-blur-sm">
+              <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-xl backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-violet-400" />
-                    <span className="text-sm text-violet-300 font-medium">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400 flex-shrink-0" />
+                    <span className="text-sm text-violet-300 font-medium truncate">
                       {selectedFile.name}
                     </span>
-                    <span className="text-xs text-violet-400 bg-violet-500/20 px-2 py-1 rounded-full">
+                    <span className="text-xs text-violet-400 bg-violet-500/20 px-2 py-1 rounded-full flex-shrink-0">
                       {(selectedFile.size / 1024).toFixed(1)} KB
                     </span>
                   </div>
@@ -316,21 +357,21 @@ export default function ChatInterface() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedFile(null)}
-                    className="h-8 w-8 p-0 text-violet-400 hover:text-violet-300 hover:bg-violet-500/20 rounded-lg"
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-violet-400 hover:text-violet-300 hover:bg-violet-500/20 rounded-lg flex-shrink-0 ml-2"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
             )}
-            <div className="flex items-end gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-end gap-2 sm:gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-3 sm:p-4 shadow-lg">
               <Textarea
                 ref={textareaRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Describe the job you're applying for, or paste in the job description..."
-                className="h-24 resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed"
-                rows={4}
+                className="resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed min-h-[80px] sm:min-h-[96px]"
+                rows={3}
               />
               <input
                 type="file"
@@ -339,23 +380,25 @@ export default function ChatInterface() {
                 accept=".pdf"
                 className="hidden"
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleFileUpload}
-                className="flex-shrink-0 w-10 h-10 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl"
-              >
-                <Paperclip className="w-5 h-5" />
-              </Button>
-              <Button
-                onClick={handleSendMessage}
-                disabled={isLoading}
-                className="flex-shrink-0 w-10 h-10 bg-gradient-to-r cursor-pointer from-violet-600 to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md shadow-purple-500/25 transition-all duration-200 hover:shadow-purple-500/40 hover:scale-105"
-              >
-                <Send className="w-5 h-5" />
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleFileUpload}
+                  className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl"
+                >
+                  <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !inputValue.trim() || !selectedFile}
+                  className="disabled:cursor-not-allowed flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r cursor-pointer from-violet-600 to-purple-600 rounded-xl shadow-md shadow-purple-500/25 transition-all duration-200 hover:shadow-purple-500/40 hover:scale-105"
+                >
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </div>
             </div>
-            <p className="text-xs text-slate-500 text-center mt-3 font-medium">
+            <p className="text-xs text-slate-500 text-center mt-2 sm:mt-3 font-medium">
               Supports PDF files
             </p>
           </div>
