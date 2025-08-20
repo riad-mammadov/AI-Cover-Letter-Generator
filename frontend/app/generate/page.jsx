@@ -82,10 +82,13 @@ export default function ChatInterface() {
     setInputValue("");
 
     try {
-      const data = await fetch("http://127.0.0.1:8000/file/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const data = await fetch(
+        "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!data.ok) {
         setMessages((prevMessages) => [
