@@ -5,29 +5,6 @@ import { Sparkles, FileText, Zap } from "lucide-react";
 import Header from "@/components/Header";
 
 export default function CoverLetterGenerator() {
-  const [fileName, setFileName] = useState("");
-  const fileInputRef = useRef(null);
-  const handleAttachClick = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileChange = useCallback((event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-      console.log("File attached:", file.name);
-      // TBC
-    }
-  }, []);
-
-  const handleGenerateClick = useCallback(() => {
-    const jobDescription = document.getElementById("job-description")?.value;
-    console.log(
-      "Generating cover letter with job description:",
-      jobDescription
-    );
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900 text-gray-100 relative overflow-hidden">
       {/* Header */}
