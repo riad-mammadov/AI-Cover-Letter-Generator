@@ -28,5 +28,5 @@ def cover_letter_prompt(cv_text, job_desc):
     - Job Description: {job_desc}
 
     Ensure that you do not send anything but the cover letter - Your job is to create the cover letter and nothing else. Dont add any placeholder values,
-    Just start the cover letter with "Dear" and the the company name.
+    Just start the cover letter with "Dear Hiring Manager".
     Generate a complete cover letter using the information above."""
