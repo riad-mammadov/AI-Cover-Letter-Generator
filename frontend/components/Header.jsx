@@ -20,7 +20,7 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Link href="/protected">
+        <Link href="/generate">
           <Button
             variant="secondary"
             className="hover:cursor-pointer bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white font-serif backdrop-blur-sm transition-all duration-200
