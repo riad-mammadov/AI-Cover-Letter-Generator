@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, APIRouter, Form
+from fastapi import FastAPI, UploadFile, APIRouter, Form, HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
 from response_model.models import PDFInfo, AIRes
 import pymupdf
@@ -8,6 +8,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import os
 from prompt import cover_letter_prompt
+
 
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -65,25 +66,41 @@ def generate(prompt: str):
 
 @router.post("/gen", response_model=AIRes)
 def get_content(cv_text, description):
-    prompt = cover_letter_prompt(cv_text=cv_text, job_desc=description)
-    res = generate(prompt)
-    return res
+    if not cv_text:
+        raise HTTPException(status_code=400, detail="CV text cannot be empty")
+    if not description.strip():
+        raise HTTPException(status_code=400, detail="Job description cannot be empty")
+
+
+    try:
+        prompt = cover_letter_prompt(cv_text=cv_text, job_desc=description)
+        res = generate(prompt)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating cover letter: {str(e)}")
 
 
 @router.post("/upload")
 async def upload(uploaded_file: UploadFile, description: str = Form(...)):
-    file_bytes = await uploaded_file.read()
-    doc = pymupdf.open(stream=file_bytes, filetype="pdf")
-    text = ""
-    for page in doc:
-        text += page.get_text()
-    
-    text = re.sub(r"\s+", " ", text)
-    section = clean_up(text, description)
+    if not uploaded_file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No File uploaded")
+    elif not description:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No job description found")
+    try:
+        file_bytes = await uploaded_file.read()
+        doc = pymupdf.open(stream=file_bytes, filetype="pdf")
+        text = ""
+        for page in doc:
+            text += page.get_text()
+        
+        text = re.sub(r"\s+", " ", text)
+        section = clean_up(text, description)
 
-    response = get_content(**section)
+        response = get_content(**section)
 
-    return response
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong on our side")
 
 # @router.post("/job_desc")
 # def description(description: str):
