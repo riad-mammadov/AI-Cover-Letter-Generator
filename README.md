@@ -10,7 +10,7 @@
 
 ## 🚀 Live Demo
 
-**[View Live Project →](https://ai-cover-letter-generator-khaki.vercel.app)**
+**[View Live Project](https://ai-cover-letter-generator-khaki.vercel.app)**
 
 ---
 
