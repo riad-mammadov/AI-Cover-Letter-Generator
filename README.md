@@ -20,8 +20,8 @@ CoverMe is an AI powered cover letter generator that helps job seekers create pe
 
 ### ✨ Key Features
 
-- **🤖 AI-Powered Generation** - Leverages Google Gemini AI for intelligent cover letter creation
-- **📄 Resume Upload** - Supports PDF resume uploads for personalised content
+- **🤖 AI-Powered Generation** - Leverages Google Gemini AI for intelligent cover letter creation and reviews
+- **📄 Resume Upload and CV Reviews (NEW!)** - Supports PDF resume uploads for personalised content | New CV Review feature - get personalised, role specific feedback to boost chances of landing the job you want
 - **💬 Interactive Interface** - GPT-inspired interface for familiarity
 - **📱 Fully Responsive** - Optimized for desktop, tablet, and mobile devices
 - **🎨 Modern UI/UX** - Clean, gradient-based design with smooth animations
