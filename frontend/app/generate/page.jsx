@@ -18,6 +18,10 @@ import {
   HelpCircle,
   HeartPlus,
   ViewIcon,
+  File,
+  Sparkle,
+  Rocket,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -178,17 +182,7 @@ export default function ChatInterface() {
             </Button>
           </div>
 
-          <div className="p-4 sm:p-6">
-            <Button
-              variant="ghost"
-              onClick={handleClearChat}
-              className="w-full justify-center gap-3 bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white transition-all duration-200 cursor-pointer font-serif font-medium py-3 rounded-xl text-sm sm:text-base"
-            >
-              Clear Chat
-            </Button>
-          </div>
-
-          <div className="flex-1 px-4 sm:px-6 overflow-y-auto">
+          <div className="flex-1 px-4 sm:px-6 mt-4 overflow-y-auto">
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
                 Navigation
@@ -201,6 +195,15 @@ export default function ChatInterface() {
                 >
                   <Home className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
                   <span className="text-sm font-medium">Home</span>
+                </Button>
+              </Link>
+              <Link href="/review">
+                <Button
+                  variant="ghost"
+                  className="w-full hover:cursor-pointer justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
+                >
+                  <File className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
+                  <span className="text-sm font-medium">CV Review</span>
                 </Button>
               </Link>
 
@@ -227,6 +230,15 @@ export default function ChatInterface() {
                 </Button>
               </Link>
             </div>
+          </div>
+          <div className="p-4 sm:p-6">
+            <Button
+              variant="ghost"
+              onClick={handleClearChat}
+              className="w-full justify-center gap-3 bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white transition-all duration-200 cursor-pointer font-sans font-semibold py-3 rounded-xl text-sm sm:text-base"
+            >
+              Clear Chat
+            </Button>
           </div>
 
           {/* Project Info at Bottom */}

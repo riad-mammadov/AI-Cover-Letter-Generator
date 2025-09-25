@@ -11,7 +11,7 @@ export default function CoverLetterGenerator() {
       <Header />
 
       {/* Hero Section */}
-      <main className="flex-grow flex flex-col items-center bg-transparent justify-center w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-10 py-8 sm:py-0">
+      <main className="flex-grow flex flex-col items-center bg-transparent justify-center w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-10 py-2 sm:py-0">
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-3 py-2 sm:px-4 sm:py-2 mb-4 sm:mb-6">
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
