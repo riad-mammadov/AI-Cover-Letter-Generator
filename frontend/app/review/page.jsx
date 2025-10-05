@@ -4,9 +4,20 @@ import { useRef, useCallback, useState } from "react";
 import { Sparkles, FileCheck, Upload, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CVReviewPage() {
   const [fileName, setFileName] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleUploadClick = () => {
@@ -17,6 +28,12 @@ export default function CVReviewPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file);
+    setModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    fileInputRef.current.value = "";
+    setFileName(null);
   };
 
   return (
@@ -105,6 +122,36 @@ export default function CVReviewPage() {
           </div>
         </div>
       </main>
+      <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
+        <AlertDialogContent
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          className="bg-neutral-900 border-neutral-700"
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              File Uploaded Successfully
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-neutral-400">
+              Please confirm if{" "}
+              <span className="font-bold text-neutral-300">
+                {fileName?.name.replace(".pdf", "")}
+              </span>{" "}
+              is the file that you would like to review
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-3">
+            <AlertDialogCancel
+              onClick={handleCancel}
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300 "
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction className="bg-neutral-700 text-white hover:bg-neutral-600">
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
