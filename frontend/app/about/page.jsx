@@ -1,19 +1,12 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Header from "@/components/Header";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900 text-white">
       {/* Header with back button */}
-      <div className="container mx-auto px-4 py-6">
-        <Link
-          href="/generate"
-          className="inline-flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Generator
-        </Link>
-      </div>
+      <Header />
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-8 md:py-16">
