@@ -29,12 +29,14 @@ def cover_letter_prompt(cv_text, job_desc):
 
     Ensure that you do not send anything but the cover letter - Your job is to create the cover letter and nothing else. Dont add any placeholder values,
     Start the cover letter with "Dear Hiring Manager".
+    Make sure the cover letter has a human tone.
     Generate a complete cover letter using the information above."""
 
 def cv_review_prompt(cv_text):
     return f"""
     You are an expert career coach and recruiter. 
-    Review the following CV and return feedback. 
+    Review the following CV and return feedback.
+    If you believe this is not a CV, then respond with: "Please enter a CV"
     
 
     CV TEXT:
@@ -50,6 +52,7 @@ def cv_review_prompt(cv_text):
 
     Rules:
     - Keep the summary concise but insightful.
+    - Keep the response in plain english text, no unnecessary punctuation (i.e, * [] etc...)
     - Score should reflect how competitive this CV would be in the job market (100 = outstanding, 0 = very poor).
-    - No Bulletpoints, just new lines if needed.
+    - Be realistic with the scoring, dont be generous and inflate the scores.
     """
