@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 import os
-from prompt import cover_letter_prompt
+from prompt import cover_letter_prompt, cv_review_prompt
 
 
 load_dotenv()
@@ -78,8 +78,7 @@ def get_content(cv_text, description):
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating cover letter: {str(e)}")
-
-
+    
 @router.post("/upload")
 async def upload(uploaded_file: UploadFile, description: str = Form(...)):
     if not uploaded_file:
@@ -101,6 +100,42 @@ async def upload(uploaded_file: UploadFile, description: str = Form(...)):
         return response
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong on our side")
+
+
+@router.post("/upload_review")
+async def upload(uploaded_file: UploadFile):
+    if not uploaded_file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No File uploaded")
+    try:
+        file_bytes = await uploaded_file.read()
+        doc = pymupdf.open(stream=file_bytes, filetype="pdf")
+        text = ""
+        for page in doc:
+            text += page.get_text()
+        
+        text = re.sub(r"\s+", " ", text)
+        cv_text = text.strip()                         
+
+        response = get_content_for_review(cv_text)
+
+        return response
+    except Exception as e:
+        print("Upload error:", str(e))
+
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong on our side")
+    
+def get_content_for_review(cv_text):
+    if not cv_text:
+        raise HTTPException(status_code=400, detail="CV text cannot be empty")
+
+    try:
+        prompt = cv_review_prompt(cv_text=cv_text)
+        res = generate(prompt)
+        return res
+
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=f"Error generating cover letter: {str(e)}")
 
 # @router.post("/job_desc")
 # def description(description: str):
