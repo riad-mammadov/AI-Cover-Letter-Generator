@@ -27,7 +27,7 @@ def clean_up(text, description):
     return {"cv_text": text, "description": description}
 
 def generate(prompt: str):
-    model = "gemini-2.0-flash"
+    model = "gemini-2.5-flash"
     contents = [
         types.Content(
             role="user",
@@ -127,14 +127,12 @@ async def upload(uploaded_file: UploadFile):
 def get_content_for_review(cv_text):
     if not cv_text:
         raise HTTPException(status_code=400, detail="CV text cannot be empty")
-
     try:
         prompt = cv_review_prompt(cv_text=cv_text)
         res = generate(prompt)
         return res
 
     except Exception as e:
-        print(str(e))
         raise HTTPException(status_code=500, detail=f"Error generating cover letter: {str(e)}")
 
 # @router.post("/job_desc")
