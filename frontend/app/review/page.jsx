@@ -4,6 +4,8 @@ import { useRef, useCallback, useState } from "react";
 import { Sparkles, FileCheck, Upload, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,9 +22,8 @@ export default function CVReviewPage() {
   const [fileName, setFileName] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
   const fileInputRef = useRef(null);
-
-  const router = useRouter();
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -38,30 +39,37 @@ export default function CVReviewPage() {
   const handleCancel = () => {
     fileInputRef.current.value = "";
     setFileName(null);
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
   };
 
   const handleConfirm = async () => {
     if (!fileName) return;
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("uploaded_file", fileName);
+    // const formData = new FormData();
+    // formData.append("uploaded_file", fileName);
 
-    try {
-      const data = await fetch(
-        // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
-        "http://localhost:8000/file/upload_review",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const response = await data.json();
-      console.log(response.text);
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   const data = await fetch(
+    //     // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload_review",
+    //     "http://localhost:8000/file/upload_review",
+    //     {
+    //       method: "POST",
+    //       body: formData,
+    //     }
+    //   );
+    //   const response = await data.json();
+    //   console.log(response.text);
+    //   setResponse(response.text);
+    setTimeout(() => {
+      setLoading(false);
+    }, 15000);
+    // } catch (error) {
+    //   console.log(error);
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -159,26 +167,27 @@ export default function CVReviewPage() {
               File Uploaded Successfully
             </AlertDialogTitle>
             <AlertDialogDescription className="text-neutral-400">
-              Please confirm if{" "}
-              <span className="font-bold text-neutral-300">
-                {fileName?.name.replace(".pdf", "")}
-              </span>{" "}
-              is the file that you would like to review
+              Ready to start a review on{" "}
+              <span className="font-semibold text-neutral-300">
+                {fileName?.name.replace(".pdf", "") || "this file"}
+              </span>
+              ? {""}
+              Continue to proceed, or cancel and pick another file.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex gap-3">
             <AlertDialogCancel
               onClick={handleCancel}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300 hover:cursor-pointer"
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300 border-none hover:cursor-pointer"
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               onClick={handleConfirm}
-              className="bg-neutral-700 text-white hover:bg-neutral-600 hover:cursor-pointer"
+              className="bg-stone-600 text-gray-200 hover:bg-stone-500 hover:cursor-pointer"
             >
-              Continue
-            </AlertDialogAction>
+              {!loading ? "Continue" : <Spinner />}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
