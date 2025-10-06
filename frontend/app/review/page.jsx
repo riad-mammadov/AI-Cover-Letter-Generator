@@ -14,11 +14,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 export default function CVReviewPage() {
   const [fileName, setFileName] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
+
+  const router = useRouter();
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -36,10 +40,33 @@ export default function CVReviewPage() {
     setFileName(null);
   };
 
+  const handleConfirm = async () => {
+    if (!fileName) return;
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("uploaded_file", fileName);
+
+    try {
+      const data = await fetch(
+        // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
+        "http://localhost:8000/file/upload_review",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const response = await data.json();
+      console.log(response.text);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900 text-gray-100 relative overflow-hidden">
       <Header />
-
       {/* Hero Section */}
       <main className="flex flex-col items-center bg-transparent justify-center w-full max-w-4xl mx-auto px-4 sm:px-6 relative py-6 z-10 ">
         <div className="text-center mb-8 sm:mb-12">
@@ -142,11 +169,14 @@ export default function CVReviewPage() {
           <AlertDialogFooter className="flex gap-3">
             <AlertDialogCancel
               onClick={handleCancel}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300 "
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300 hover:cursor-pointer"
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-neutral-700 text-white hover:bg-neutral-600">
+            <AlertDialogAction
+              onClick={handleConfirm}
+              className="bg-neutral-700 text-white hover:bg-neutral-600 hover:cursor-pointer"
+            >
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>
