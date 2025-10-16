@@ -34,25 +34,39 @@ def cover_letter_prompt(cv_text, job_desc):
 
 def cv_review_prompt(cv_text):
     return f"""
-    You are an expert career coach and recruiter. 
-    Review the following CV and return feedback.
-    If you believe this is not a CV, then respond with: "Please enter a CV"
-    
+    You are an experienced career coach and professional recruiter.
+    Your task is to critically review the following CV and provide structured, realistic feedback.
+
+    If the text provided does not appear to be a CV, respond only with:
+    "Please enter a CV."
 
     CV TEXT:
     {cv_text}
 
-    Your response must follow this schema, include nothing else apart from this:
+    ---
+    Your response must follow this exact structure and formatting (no extra text, titles, or symbols):
 
-    Summary: One-paragraph overall impression of the CV.,
-    Strengths: List of specific strengths found in the CV.,
-    Weaknesses: List of specific weaknesses or missing elements.,
-    Recommendations: "Concrete, actionable advice to improve the CV.,
-    Score: 0-100
+    Score: [numeric score from 0 to 100]
 
-    Rules:
-    - Keep the summary concise but insightful.
-    - Keep the response in plain english text, no unnecessary punctuation (i.e, * [] etc...)
-    - Score should reflect how competitive this CV would be in the job market (100 = outstanding, 0 = very poor).
-    - Be realistic with the scoring, dont be generous and inflate the scores.
+    Summary:
+    [1 short paragraph giving an overall impression of the CV — tone, clarity, and competitiveness.]
+
+    Strengths:
+    - [List 3–6 specific strengths. Each should be clear and concrete.]
+
+    Weaknesses:
+    - [List 3–6 weaknesses, gaps, or unclear areas.]
+
+    Recommendations:
+    - [List 3–6 clear, actionable steps the user can take to improve the CV.]
+
+    ---
+    Guidelines:
+    - Use plain, professional English (no markdown, asterisks, or emojis).
+    - Keep each section concise but meaningful — focus on what matters to recruiters.
+    - Create a new line for each bulletpoint.
+    - The score should realistically reflect how competitive this CV would be for graduate or entry-level roles. (100 = exceptional, 0 = very poor).
+    - Be specific: comment on structure, clarity, impact, and relevance, not just general traits.
+    - Avoid repeating the same ideas across sections.
     """
+
