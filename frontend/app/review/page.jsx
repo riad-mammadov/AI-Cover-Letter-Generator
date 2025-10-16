@@ -265,7 +265,7 @@ export default function CVReviewPage() {
               Your CV Review
             </DialogTitle>
             <DialogDescription asChild>
-              <div className="text-neutral-300 text-sm leading-relaxed whitespace-pre-line max-h-[70vh] overflow-y-auto p-2">
+              <div className="text-neutral-300 text-sm leading-relaxed whitespace-pre-line max-h-[70vh] overflow-y-auto p-2 text-left">
                 {response}
               </div>
             </DialogDescription>
