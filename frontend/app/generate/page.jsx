@@ -22,6 +22,7 @@ import {
   Sparkle,
   Rocket,
   Star,
+  CopyCheck,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,8 +31,6 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-
-  // Mock data for now
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -39,6 +38,7 @@ export default function ChatInterface() {
       content: `I'm ready to help you create the perfect cover letter! Upload your resume and share the job description you're applying for, and I'll craft a personalised cover letter that highlights your best qualities.`,
     },
   ]);
+  const [copied, setCopied] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -54,9 +54,14 @@ export default function ChatInterface() {
   }, [messages]);
 
   const copyToClipboard = (text) => {
+    setCopied(true);
+
     navigator.clipboard.writeText(text).catch((err) => {
       console.error("Failed to copy text:", err);
     });
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   const handleSendMessage = async () => {
@@ -332,8 +337,12 @@ export default function ChatInterface() {
                               onClick={() => copyToClipboard(message.content)}
                               className="h-7 sm:h-8 px-2 sm:px-3 text-xs hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg"
                             >
-                              <Copy className="w-3 h-3 mr-1 sm:mr-2" />
-                              Copy
+                              {copied ? (
+                                <CopyCheck />
+                              ) : (
+                                <Copy className="w-3 h-3 mr-1 sm:mr-2" />
+                              )}
+                              {copied ? "Copied" : "Copy"}
                             </Button>
                           </div>
                         )}
