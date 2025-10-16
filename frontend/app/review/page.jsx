@@ -1,7 +1,14 @@
 "use client";
 
 import { useRef, useCallback, useState } from "react";
-import { Sparkles, FileCheck, Upload, CheckCircle } from "lucide-react";
+import {
+  Sparkles,
+  FileCheck,
+  Upload,
+  CheckCircle,
+  Copy,
+  CopyCheck,
+} from "lucide-react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -16,20 +23,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 
 export default function CVReviewPage() {
   const [fileName, setFileName] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [secondModalOpen, setSecondModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e) => {
+  const copyToClipboard = (text) => {
+    setCopied(true);
+    navigator.clipboard.writeText(text).catch((err) => {
+      console.error("Failed to copy text:", err);
+    });
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file);
@@ -48,28 +76,33 @@ export default function CVReviewPage() {
     if (!fileName) return;
     setLoading(true);
 
-    // const formData = new FormData();
-    // formData.append("uploaded_file", fileName);
+    const formData = new FormData();
+    formData.append("uploaded_file", fileName);
 
-    // try {
-    //   const data = await fetch(
-    //     // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload_review",
-    //     "http://localhost:8000/file/upload_review",
-    //     {
-    //       method: "POST",
-    //       body: formData,
-    //     }
-    //   );
-    //   const response = await data.json();
-    //   console.log(response.text);
-    //   setResponse(response.text);
-    setTimeout(() => {
+    try {
+      const data = await fetch(
+        "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload_review",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const response = await data.json();
+      console.log(response.text);
+      setResponse(response.text);
       setLoading(false);
-    }, 15000);
-    // } catch (error) {
-    //   console.log(error);
-    //   setLoading(false);
-    // }
+      setModalOpen((prev) => !prev);
+      setSecondModalOpen((prev) => !prev);
+      fileInputRef.current.value = "";
+      setFileName(null);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setError(true);
+      setTimeout(() => {
+        setError(false);
+      }, 2250);
+    }
   };
 
   return (
@@ -92,6 +125,25 @@ export default function CVReviewPage() {
             Upload your CV and get instant AI-powered feedback to improve your
             resume and stand out.
           </p>
+          {response && (
+            <div className="flex flex-row items-center justify-center space-x-2">
+              <Button
+                className="mt-4 bg-gray-700 text-slate-300 hover:bg-gray-600 hover:text-white font-sans font-semibold  transition-all duration-200 cursor-pointer"
+                variant="secondary"
+                onClick={() => setSecondModalOpen(true)}
+              >
+                View Previous Results
+              </Button>
+              <Button
+                className="mt-4 bg-gray-700 text-slate-300 hover:bg-gray-600 hover:text-white font-sans font-semibold  transition-all duration-200 cursor-pointer"
+                variant="secondary"
+                size="icon"
+                onClick={() => copyToClipboard(response)}
+              >
+                {copied ? <CopyCheck /> : <Copy />}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Upload Section */}
@@ -159,38 +211,76 @@ export default function CVReviewPage() {
       </main>
       <AlertDialog open={modalOpen} onOpenChange={setModalOpen}>
         <AlertDialogContent
-          onOpenAutoFocus={(event) => event.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className="bg-neutral-900 border-neutral-700"
         >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">
-              File Uploaded Successfully
+              {error
+                ? "File Upload Unsuccessful"
+                : "File Uploaded Successfully"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-neutral-400">
-              Ready to start a review on{" "}
-              <span className="font-semibold text-neutral-300">
-                {fileName?.name.replace(".pdf", "") || "this file"}
-              </span>
-              ? {""}
-              Continue to proceed, or cancel and pick another file.
+              {error ? (
+                "An error occurred. For more information, check console logs."
+              ) : (
+                <>
+                  Ready to start a review on{" "}
+                  <span className="font-semibold text-neutral-300">
+                    {fileName?.name.replace(".pdf", "") || "this file"}
+                  </span>
+                  ? Continue to proceed, or cancel and pick another file.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex gap-3">
-            <AlertDialogCancel
-              onClick={handleCancel}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300 border-none hover:cursor-pointer"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <Button
-              onClick={handleConfirm}
-              className="bg-stone-600 text-gray-200 hover:bg-stone-500 hover:cursor-pointer"
-            >
-              {!loading ? "Continue" : <Spinner />}
-            </Button>
+            {!error && (
+              <>
+                <AlertDialogCancel
+                  onClick={handleCancel}
+                  className="bg-gray-200 text-gray-800 hover:bg-gray-300 border-none hover:cursor-pointer"
+                >
+                  Cancel
+                </AlertDialogCancel>
+
+                <Button
+                  onClick={handleConfirm}
+                  className="bg-stone-600 text-gray-200 hover:bg-stone-500 hover:cursor-pointer"
+                >
+                  {!loading ? "Continue" : <Spinner />}
+                </Button>
+              </>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={secondModalOpen} onOpenChange={setSecondModalOpen}>
+        <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="bg-neutral-900 border-neutral-700 max-w-3xl"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl font-semibold">
+              Your CV Review
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="text-neutral-300 text-sm leading-relaxed whitespace-pre-line max-h-[70vh] overflow-y-auto p-2">
+                {response}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex justify-end mt-4">
+            <Button
+              onClick={() => setSecondModalOpen(false)}
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300 border-none cursor-pointer"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
