@@ -64,7 +64,6 @@ def generate(prompt: str):
 
         
 
-@router.post("/gen", response_model=AIRes)
 def get_content(cv_text, description):
     if not cv_text:
         raise HTTPException(status_code=400, detail="CV text cannot be empty")
