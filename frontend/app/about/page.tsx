@@ -31,7 +31,7 @@ export default function AboutPage() {
                 <p>
                   CoverMe uses AI to generate cover letters that match your
                   experience with specific job requirements. Simply upload your
-                  resume, paste the job description, and let our CoverMe handle
+                  resume, paste the job description, and let our prompt handle
                   the rest.
                 </p>
                 <p>

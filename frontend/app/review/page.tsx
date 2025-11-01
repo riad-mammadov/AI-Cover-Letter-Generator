@@ -130,6 +130,7 @@ export default function CVReviewPage() {
               <Button
                 className="mt-4 bg-gray-700 text-slate-300 hover:bg-gray-600 hover:text-white font-sans font-semibold  transition-all duration-200 cursor-pointer"
                 variant="secondary"
+                size="default"
                 onClick={() => setSecondModalOpen(true)}
               >
                 View Previous Results
@@ -214,7 +215,7 @@ export default function CVReviewPage() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="bg-neutral-900 border-neutral-700"
         >
-          <AlertDialogHeader>
+          <AlertDialogHeader className="">
             <AlertDialogTitle className="text-white">
               {error
                 ? "File Upload Unsuccessful"
@@ -245,10 +246,12 @@ export default function CVReviewPage() {
                 </AlertDialogCancel>
 
                 <Button
+                  size="default"
+                  variant="default"
                   onClick={handleConfirm}
                   className="bg-stone-600 text-gray-200 hover:bg-stone-500 hover:cursor-pointer"
                 >
-                  {!loading ? "Continue" : <Spinner />}
+                  {!loading ? "Continue" : <Spinner className="" />}
                 </Button>
               </>
             )}
@@ -260,11 +263,11 @@ export default function CVReviewPage() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="bg-neutral-900 border-neutral-700 max-w-3xl"
         >
-          <DialogHeader>
+          <DialogHeader className="">
             <DialogTitle className="text-white text-2xl font-semibold">
               Your CV Review
             </DialogTitle>
-            <DialogDescription asChild>
+            <DialogDescription className="" asChild>
               <div className="text-neutral-300 text-sm leading-relaxed whitespace-pre-line max-h-[70vh] overflow-y-auto p-2 text-left">
                 {response}
               </div>
@@ -273,6 +276,8 @@ export default function CVReviewPage() {
 
           <DialogFooter className="flex justify-end mt-4">
             <Button
+              variant="default"
+              size="default"
               onClick={() => setSecondModalOpen(false)}
               className="bg-gray-200 text-gray-800 hover:bg-gray-300 border-none cursor-pointer"
             >
