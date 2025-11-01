@@ -15,35 +15,41 @@ import {
   Copy,
   Home,
   Info,
-  HelpCircle,
-  HeartPlus,
   ViewIcon,
   File,
-  Sparkle,
-  Rocket,
-  Star,
   CopyCheck,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function ChatInterface() {
+  interface Message {
+    id: number;
+    type: "user" | "model";
+    content: string;
+  }
+
+  interface APIResponse {
+    role: "user" | "model";
+    text: string;
+  }
+
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [messages, setMessages] = useState([
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "model",
       content: `I'm ready to help you create the perfect cover letter! Upload your resume and share the job description you're applying for, and I'll craft a personalised cover letter that highlights your best qualities.`,
     },
   ]);
-  const [copied, setCopied] = useState(false);
 
-  const messagesEndRef = useRef(null);
-  const textareaRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const scrollAreaRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,7 +59,7 @@ export default function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     setCopied(true);
 
     navigator.clipboard.writeText(text).catch((err) => {
@@ -92,7 +98,8 @@ export default function ChatInterface() {
 
     try {
       const data = await fetch(
-        "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
+        // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
+        "http://127.0.0.1:8000/file/upload",
         {
           method: "POST",
           body: formData,
@@ -114,7 +121,8 @@ export default function ChatInterface() {
         return;
       }
 
-      const response = await data.json();
+      const response: APIResponse = await data.json();
+
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -125,11 +133,9 @@ export default function ChatInterface() {
             "An error occurred while generating the cover letter. Please try again.",
         },
       ]);
-      console.log("File uploaded successfully:", response);
     } catch (err) {
       console.error("Error uploading file:", err);
     }
-
     setIsLoading(false);
   };
 
@@ -151,7 +157,7 @@ export default function ChatInterface() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -195,6 +201,7 @@ export default function ChatInterface() {
 
               <Link href="/">
                 <Button
+                  size="default"
                   variant="ghost"
                   className="w-full hover:cursor-pointer justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                 >
@@ -204,6 +211,7 @@ export default function ChatInterface() {
               </Link>
               <Link href="/review">
                 <Button
+                  size="default"
                   variant="ghost"
                   className="w-full hover:cursor-pointer justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                 >
@@ -214,6 +222,7 @@ export default function ChatInterface() {
 
               <Link href="/about">
                 <Button
+                  size="default"
                   variant="ghost"
                   className="w-full hover:cursor-pointer justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                   onClick={() => console.log("About clicked")}
@@ -224,6 +233,7 @@ export default function ChatInterface() {
               </Link>
               <Link href="https://riadmammadov.co.uk" target="_blank">
                 <Button
+                  size="default"
                   variant="ghost"
                   className="w-full hover:cursor-pointer justify-start gap-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl p-3 sm:p-4 transition-all duration-200"
                   onClick={() => console.log("Help clicked")}
@@ -238,6 +248,7 @@ export default function ChatInterface() {
           </div>
           <div className="p-4 sm:p-6">
             <Button
+              size="default"
               variant="ghost"
               onClick={handleClearChat}
               className="w-full justify-center gap-3 bg-gray-700 text-slate-200 hover:bg-gray-600 hover:text-white transition-all duration-200 cursor-pointer font-sans font-semibold py-3 rounded-xl text-sm sm:text-base"
@@ -412,7 +423,9 @@ export default function ChatInterface() {
               <Textarea
                 ref={textareaRef}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setInputValue(e.target.value)
+                }
                 placeholder="Describe the job you're applying for, or paste in the job description..."
                 className="resize-none border-none bg-transparent focus:ring-0 focus-visible:ring-0 text-sm placeholder:text-slate-500 text-slate-100 leading-relaxed min-h-[80px] sm:min-h-[96px]"
                 rows={3}
@@ -434,6 +447,8 @@ export default function ChatInterface() {
                   <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
                 <Button
+                  size="default"
+                  variant="default"
                   onClick={handleSendMessage}
                   disabled={isLoading || !inputValue.trim() || !selectedFile}
                   className="disabled:cursor-not-allowed flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r cursor-pointer from-violet-600 to-purple-600 rounded-xl shadow-md shadow-purple-500/25 transition-all duration-200 hover:shadow-purple-500/40 hover:scale-105"
