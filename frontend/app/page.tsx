@@ -79,11 +79,11 @@ export default function CoverLetterGenerator() {
               <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <h3 className="font-semibold text-white mb-2 text-sm sm:text-base">
-              Personalised
+              CV Reviews
             </h3>
             <p className="text-xs sm:text-sm text-gray-400">
-              Each letter is uniquely crafted for the specific role, ensuring
-              the best possible cover letters.
+              Get personalised feedback on your CV with our Review tool and take
+              your resume to the next level.
             </p>
           </div>
         </div>

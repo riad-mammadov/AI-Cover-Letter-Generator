@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import {
   Sparkles,
   FileCheck,
@@ -34,20 +34,23 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function CVReviewPage() {
-  const [fileName, setFileName] = useState(null);
+  interface APIResponse {
+    text: string;
+  }
+  const [fileName, setFileName] = useState<File | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [secondModalOpen, setSecondModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
+  const [response, setResponse] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     setCopied(true);
     navigator.clipboard.writeText(text).catch((err) => {
       console.error("Failed to copy text:", err);
@@ -57,7 +60,7 @@ export default function CVReviewPage() {
     }, 2000);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file);
@@ -87,8 +90,7 @@ export default function CVReviewPage() {
           body: formData,
         }
       );
-      const response = await data.json();
-      console.log(response.text);
+      const response: APIResponse = await data.json();
       setResponse(response.text);
       setLoading(false);
       setModalOpen((prev) => !prev);
