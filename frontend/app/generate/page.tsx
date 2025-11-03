@@ -98,8 +98,8 @@ export default function ChatInterface() {
 
     try {
       const data = await fetch(
-        // "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
-        "http://127.0.0.1:8000/file/upload",
+        "https://ai-cover-letter-generator-w1dv.onrender.com/file/upload",
+        // "http://127.0.0.1:8000/file/upload",
         {
           method: "POST",
           body: formData,
