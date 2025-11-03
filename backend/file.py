@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, APIRouter, Form, HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
-from response_model.models import PDFInfo, AIRes
+from response_model.models import AIRes, UploadResponse
 import pymupdf
 import re
 from google import genai
@@ -78,7 +78,7 @@ def get_content(cv_text, description):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating cover letter: {str(e)}")
     
-@router.post("/upload")
+@router.post("/upload", response_model=AIRes)
 async def upload(uploaded_file: UploadFile, description: str = Form(...)):
     if not uploaded_file:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No File uploaded")
@@ -101,7 +101,7 @@ async def upload(uploaded_file: UploadFile, description: str = Form(...)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong on our side")
 
 
-@router.post("/upload_review")
+@router.post("/upload_review", response_model=UploadResponse)
 async def upload(uploaded_file: UploadFile):
     if not uploaded_file:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No File uploaded")

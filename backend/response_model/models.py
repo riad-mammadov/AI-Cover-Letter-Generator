@@ -10,3 +10,5 @@ class AIRes(BaseModel):
     role: str
     text: str
 
+class UploadResponse(BaseModel):
+    text: str
